@@ -20,8 +20,8 @@ This project is a web application built with Flask, integrating OpenAI's GPT-bas
 ### Setup
 1. **Clone the Repository**
    ```sh
-   git clone [Your Repository URL]
-   cd [Your Repository Name]
+   git clone https://github.com/calvincs/Local-Assistants
+   cd Local-Assistants
    ```
 
 2. **Configure the `run.sh` Script**
