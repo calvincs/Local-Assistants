@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assistants</title>
+    <script src="https://unpkg.com/htmx.org" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div id="title-container">
+        <img src="{{ url_for('static', filename='img/assistant_icon.png') }}" alt="Assistant Icon">
+        <h1>Assistants</h1>
+    </div>
+    <!-- Wrap the dropdown and the clear button in a container -->
+    <div id="top-controls">
+        <button hx-post="/clear" id="clearButton">🧽 Clear Chat</button>
+        <div id="assistant-select-wrapper" hx-get="/assistant_options" hx-trigger="load">
+            <!-- The select dropdown will be loaded here -->
+        </div>
+    </div>
+    <div id="chat">
+        <!-- Chat messages will go here -->
+    </div>
+    <form hx-post="/submit" hx-target="#chat" hx-swap="beforeend" hx-push-url="false" id="chat-form">
+        <input type="text" name="message" autocomplete="off" placeholder="Type your message..." required>
+        <button type="submit" id="sendButton">Send</button>
+    </form>
+    
+    <script>
+        document.body.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.detail.target.id === 'chat') {
+                var chatContainer = document.getElementById('chat');
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                // After the swap, re-enable the input and button
+                var sendButton = document.getElementById('sendButton');
+                var inputField = document.querySelector('#chat-form input[type="text"]');
+                sendButton.disabled = false;
+                inputField.disabled = false;
+                sendButton.textContent = 'Send';
+                inputField.value = ''; // Clear the input field
+            }
+        });
+    
+        document.getElementById('chat-form').addEventListener('htmx:beforeRequest', function() {
+            var sendButton = document.getElementById('sendButton');
+            var inputField = document.querySelector('#chat-form input[type="text"]');
+            // Disable the input and button before sending the request
+            sendButton.disabled = true;
+            inputField.disabled = true;
+            sendButton.textContent = 'Sending...';
+        });
+
+        function copyCode(button) {
+            // Get the text content of the code element inside the same pre element as the button
+            var code = button.parentElement.querySelector('code').innerText;
+            
+            // Create a temporary textarea element to copy from
+            var textarea = document.createElement('textarea');
+            textarea.value = code;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy'); // Copy the text
+            document.body.removeChild(textarea); // Remove the temporary element
+            
+            // Optional: Indicate that the text was copied
+            button.textContent = 'Copied!';
+            setTimeout(function() {
+                button.textContent = 'Copy';
+            }, 2000);
+        }
+
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            if (evt.detail.xhr.responseURL.includes("/clear")) {
+                // Clear the chat div regardless of the response
+                document.getElementById('chat').innerHTML = "";
+            }
+        });
+
+
+    </script>
+    
+</body>
+</html>

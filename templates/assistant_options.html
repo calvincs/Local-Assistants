@@ -1,0 +1,5 @@
+<select id="assistant-dropdown" hx-post="/assistant_options" hx-trigger="change" name="id" hx-target="#assistant-select-wrapper">
+    {% for assistant in assistants %}
+        <option value="{{ assistant.id }}" {% if assistant.id == selected_assistant_id %} selected {% endif %}>{{ assistant.name }}</option>
+    {% endfor %}
+</select>
