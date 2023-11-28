@@ -22,8 +22,8 @@
     <div id="chat">
         <!-- Chat messages will go here -->
     </div>
-    <form hx-post="/submit" hx-target="#chat" hx-swap="beforeend" hx-push-url="false" id="chat-form">
-        <input type="text" name="message" autocomplete="off" placeholder="Type your message..." required>
+    <form hx-post="/submit" hx-target="#chat" hx-swap="beforeend" hx-push-url="false" id="chat-form" method="post">
+        <textarea name="message" autocomplete="off" placeholder="Type your message..." required></textarea>
         <button type="submit" id="sendButton">Send</button>
     </form>
     
@@ -32,23 +32,24 @@
             if (evt.detail.target.id === 'chat') {
                 var chatContainer = document.getElementById('chat');
                 chatContainer.scrollTop = chatContainer.scrollHeight;
-                // After the swap, re-enable the input and button
                 var sendButton = document.getElementById('sendButton');
-                var inputField = document.querySelector('#chat-form input[type="text"]');
+                var textarea = document.querySelector('#chat-form textarea');
                 sendButton.disabled = false;
-                inputField.disabled = false;
+                textarea.disabled = false;
                 sendButton.textContent = 'Send';
-                inputField.value = ''; // Clear the input field
+                textarea.value = ''; // Clear the textarea
+                sendButton.classList.remove('sending'); // Remove class for pulsating effect
             }
         });
     
         document.getElementById('chat-form').addEventListener('htmx:beforeRequest', function() {
             var sendButton = document.getElementById('sendButton');
-            var inputField = document.querySelector('#chat-form input[type="text"]');
-            // Disable the input and button before sending the request
+            var textarea = document.querySelector('#chat-form textarea');
+            // Disable the textarea and button before sending the request
             sendButton.disabled = true;
-            inputField.disabled = true;
+            textarea.disabled = true;
             sendButton.textContent = 'Sending...';
+            sendButton.classList.add('sending'); // Add class for pulsating effect
         });
 
         function copyCode(button) {
@@ -70,6 +71,33 @@
             }, 2000);
         }
 
+        document.querySelector('#chat-form textarea').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent the default Enter key behavior in all cases
+                if (event.shiftKey) {
+                    // When Shift + Enter is pressed, trigger form submission via HTMX
+                    htmx.trigger(this.form, 'submit', {shiftKey: true});
+                } else {
+                    // When only Enter is pressed, insert a newline at the cursor position
+                    var cursorPos = this.selectionStart;
+                    var textBefore = this.value.substring(0, cursorPos);
+                    var textAfter = this.value.substring(cursorPos);
+                    this.value = textBefore + "\n" + textAfter;
+                    
+                    // Move the cursor to right after the inserted newline
+                    this.selectionStart = this.selectionEnd = cursorPos + 1;
+                }
+            }
+        });
+
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            if (evt.detail.xhr.responseURL.includes("/submit") && !evt.detail.xhr.shiftKey) {
+                // If the request was a form submission (not just a newline insert), clear the textarea
+                var textarea = document.querySelector('#chat-form textarea');
+                textarea.value = '';
+            }
+        });
+
         document.body.addEventListener('htmx:afterRequest', function(evt) {
             if (evt.detail.xhr.responseURL.includes("/clear")) {
                 // Clear the chat div regardless of the response
@@ -77,8 +105,6 @@
             }
         });
 
-
-    </script>
-    
+    </script>    
 </body>
 </html>

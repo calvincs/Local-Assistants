@@ -1,7 +1,7 @@
 body, html {
     height: 100%;
     margin: 0;
-    padding: 10px;
+    padding: 0;
     font-family: 'Roboto', Arial, sans-serif;
     display: flex;
     flex-direction: column;
@@ -11,49 +11,40 @@ body, html {
 }
 
 h1 {
-    font-family: 'Roboto', Arial, sans-serif;
-    font-size: 40px; /* Slightly larger font size */
-    color: #ffffff; /* White color for contrast */
+    font-size: 40px;
     text-align: center;
-    margin-bottom: 20px;
-    padding: 10px;
-    text-shadow: 2px 2px 4px rgba(249, 249, 249, 0.5); /* Subtle shadow for depth */
+    margin-top: 20px; /* Space above the h1 */
+    margin-bottom: 20px; /* Space below the h1 to match chat window */
+    padding: 0;
+    text-shadow: 2px 2px 4px rgba(249, 249, 249, 0.5);
 }
 
 #title-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    margin: 0 10px; /* Horizontal margins */
 }
 
 #title-container img {
-    height: 65px; /* Adjust as needed */
+    height: 65px;
     margin-right: 10px;
     border-radius: 50%;
-
 }
 
 #chat {
     flex-grow: 1;
     background: #1e1e1e;
     border: 1px solid #333;
-    margin: 10px;
+    margin: 20px 10px; /* Increased top and bottom margin */
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: calc(100% - 40px); /* Adjusted for even padding */
-    padding: 10px 20px; /* Even padding on left and right */
+    padding: 10px 20px;
     box-sizing: border-box;
-
-    scrollbar-width: thin;
-    scrollbar-color: #555 #2e2e2e;
     overflow-y: auto;
-    -ms-overflow-style: none; /* Internet Explorer 10+ */
-    scrollbar-width: none; /* Firefox */
 }
 
-/* Style the scrollbar - webkit browsers */
-#chat::-webkit-scrollbar {
+#chat::-webkit-scrollbar, #chat::-webkit-scrollbar-thumb, #chat::-webkit-scrollbar-thumb:hover {
     width: 8px;
     background-color: #2e2e2e;
 }
@@ -68,31 +59,30 @@ h1 {
 }
 
 .user-message, .ai-message {
-    max-width: 90%;
     word-break: break-word;
     margin-bottom: 12px;
     padding: 12px;
     border-radius: 8px;
     font-size: 18px;
-}
-.user-message {
-    background: rgb(0, 95, 160, 0.75);
-    margin-left: auto;
-    margin-right: 20px; /* Off the side by at least 20px */
     color: white;
+    width: fit-content; /* Adjust width to content */
+    max-width: 90%; /* Prevent the bubble from becoming too wide */
 }
 
 .ai-message {
-    background: rgb(70, 150, 177, 0.75);
-    margin-right: auto;
-    margin-left: 20px; /* Off the side by at least 20px */
-    color: white;
-    position: relative;
+    background: rgba(0, 95, 160, 0.75);
+    align-self: flex-start; /* Align to the left */
+    margin-right: auto; /* Push the bubble to the left */
+}
+
+.user-message {
+    background: rgba(70, 150, 177, 0.75);
+    align-self: flex-end; /* Align to the right */
+    margin-left: auto; /* Push the bubble to the right */
 }
 
 .ai-agent-name {
     font-size: 14px;
-    color: white;
     font-weight: bold;
     padding-bottom: 6px;
     display: block;
@@ -100,11 +90,12 @@ h1 {
 
 #chat-form {
     display: flex;
-    margin: 10px;
-    width: calc(100% - 40px); /* Match the width of #chat minus its padding and margin */
+    margin: 0 10px 20px 10px; /* Aligned horizontal margins with #chat, increased bottom margin */
+    width: calc(100% - 40px); /* Match the width of the chat box */
+    align-items: center;
 }
 
-#chat-form input[type="text"] {
+#chat-form textarea {
     flex-grow: 1;
     padding: 12px;
     border: 1px solid #555;
@@ -112,20 +103,44 @@ h1 {
     background: #262626;
     color: white;
     font-size: 16px;
-    margin-right: 10px; /* Adjust spacing between input and button */
-    margin-bottom: 15px; /* Adjust spacing between input and chat messages */
+    margin-right: 10px;
+    margin-bottom: 15px;
+    resize: vertical;
+    line-height: 1.5;
+    overflow-y: auto;
+}
+
+/* Scrollbar Styles for Textarea */
+#chat-form textarea::-webkit-scrollbar, 
+#chat-form textarea::-webkit-scrollbar-thumb, 
+#chat-form textarea::-webkit-scrollbar-thumb:hover {
+    width: 8px;
+    background-color: #2e2e2e;
+}
+
+#chat-form textarea::-webkit-scrollbar-thumb {
+    background-color: #555;
+    border-radius: 4px;
+}
+
+#chat-form textarea::-webkit-scrollbar-thumb:hover {
+    background: #777;
 }
 
 #chat-form button {
+    width: auto;
     padding: 12px 24px;
-    border: none;
+    border: 2px solid #0057b7; /* Solid border to support the neon glow */
     background: #0057b7;
     color: white;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
     margin-bottom: 15px;
-    /* Removed margin-right to fit within the #chat width */
+    position: relative; /* Needed for pseudo-element positioning */
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 #chat-form button:hover {
@@ -133,46 +148,57 @@ h1 {
 }
 
 #chat-form button:disabled {
-    background-color: #303f9fbd;
+    background-color: #004c9e;
 }
 
-#sendingIndicator {
-    color: #aaa;
-    margin-left: 10px;
-    display: none;
+#chat-form button.sending {
+    pointer-events: none; /* Prevents further clicks during the sending process */
+    animation: movingGlow 15s linear infinite;
+    background-image: linear-gradient(270deg, #01356b, #0057b7, #01356b);
+    background-size: 200% 200%;
+    font-family: 'Roboto', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
 }
-/* Styles for code blocks */
+
+@keyframes movingGlow {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
 pre {
-    position: relative; /* Make the pre element a positioned container */
+    position: relative; /* Ensure that the pre element is positioned relative to place the copy button absolutely within it */
     background: rgba(0, 0, 0, 0.4);
     border: 1px solid #e1e4e8;
     padding: 30px 16px 16px 16px; /* Padding to make room for the button */
     margin: 10px 0;
     overflow-x: auto;
     font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-    font-size: 18px; /* Increased to match chat message font size */
+    font-size: 18px;
     border-radius: 6px;
 }
 
-/* Styles for the copy button */
 .copy-button {
-    position: absolute;
-    top: 5px; /* Positioned at the top inside the pre block */
-    right: 5px;
-    padding: 8px; /* Increased padding for better visual balance with the emoji */
+    position: absolute; /* Position the copy button absolutely within the pre element */
+    top: 8px; /* Position at the top inside the pre block */
+    right: 8px; /* Position on the right inside the pre block */
+    padding: 8px;
     background-color: #f7f7f7;
     border: 1px solid #ddd;
     border-radius: 4px;
     cursor: pointer;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     transition: all 0.3s ease;
-    font-size: 8px; /* Increased font size for better visibility of the emoji */
+    font-size: 12px;
     color: #333;
-    line-height: 1; /* Ensure the emoji is vertically centered */
-    text-align: center; /* Ensure the emoji is horizontally centered */
+    line-height: 1;
+    text-align: center;
 }
 
-/* Clipboard icon using FontAwesome */
 .copy-button:before {
     content: '📋';
     margin-right: 5px;
@@ -190,98 +216,71 @@ pre {
     transform: translateY(1px);
     box-shadow: 0 2px 3px rgba(0,0,0,0.2);
 }
+
 code {
     background: none;
     padding: 0;
 }
 
-/* Styles for code blocks with copy button */
-.code-container pre {
-    position: relative;
-    padding-top: 30px; /* Make room for the clipboard button at the top */
-}
-
-/* Add styles for the top controls container */
 #top-controls {
-    display: flex; /* Use flexbox for flexible layout */
-    justify-content: center; /* Center the controls horizontally */
-    align-items: center; /* Align items vertically */
-    margin: 0 auto 20px auto; /* Center the controls and add space below them */
-    width: calc(100% - 20px); /* Adjust the width to match the chat window */
-    max-width: 768px; /* Set max-width to match the chat window's max-width if necessary */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 10px; /* Horizontal margins aligned with #chat */
+    width: calc(100% - 40px); /* Width adjusted to match chat box */
 }
 
-/* Assistant select wrapper and clear button styles */
-#assistant-select-wrapper, #clearButton {
-    margin: 0 5px; /* Provide spacing on left and right */
+#clearButton, #assistant-select-wrapper {
+    flex-grow: 0;
+    margin: 0 5px;
 }
 
-/* Styles for clear button */
 #clearButton {
-    padding: 10px 15px; /* Padding to match the dropdown */
-    font-size: 14px; /* Font size to match the dropdown */
-    background: #262626; /* Same background color */
-    border: 1px solid #555; /* Similar border */
-    color: white; /* Text color */
-    border-radius: 5px; /* Rounded corners */
-    cursor: pointer; /* Cursor to pointer */
-    flex-shrink: 0; /* Prevent the button from shrinking */
-    flex-grow: 0; /* Do not allow the button to grow */
+    padding: 10px 15px;
+    font-size: 14px;
+    background: #262626;
+    border: 1px solid #555;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
-/* Styles for assistant select wrapper */
 #assistant-select-wrapper {
-    flex-grow: 1; /* Allow the select wrapper to grow and fill the available space */
+    flex-grow: 1;
+    display: flex;
 }
 
-/* Styles for assistant dropdown */
 #assistant-dropdown {
-    width: 100%; /* Allow the dropdown to fill the wrapper */
+    width: 100%;
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #555;
     background: #262626;
     color: white;
     font-size: 14px;
-    font-family: 'Roboto', Arial, sans-serif;
 }
 
-/* Neon Orange Border Hover Effect */
 #clearButton:hover, #assistant-dropdown:hover {
-    border-color: #ff4500; /* Neon Orange Border */
-}
-/* Keyframes for Pulsing Border Effect */
-@keyframes pulseBorder {
-    0% {
-        border-color: #0000ff;
-    }
-    50% {
-        border-color: #1e90ff;
-    }
-    100% {
-        border-color: #0000ff;
-    }
-}
-
-/* Pulsing Blue Border Hover Effect */
-#clearButton:hover, #assistant-dropdown:hover {
+    border-color: #ff4500;
     animation: pulseBorder 2s infinite;
 }
 
-/* Adjustments for smaller screens */
 @media (max-width: 600px) {
+    h1, #title-container, #top-controls, #chat, #chat-form {
+        margin: 20px 10px; /* Consistent vertical margin for all elements */
+        width: calc(100% - 20px); /* Adjust width for small screens */
+    }
+
     #top-controls {
-        flex-direction: column; /* Stack elements on smaller screens */
-        width: calc(100% - 20px); /* Adjust the width to match the chat window */
+        flex-direction: column;
     }
-    #assistant-select-wrapper, #clearButton {
-        width: 100%; /* Full width for smaller screens */
-        margin-bottom: 10px; /* Space between stacked elements */
+
+    #clearButton, #assistant-select-wrapper, #assistant-dropdown {
+        width: 100%;
+        margin-bottom: 10px;
     }
-    #assistant-dropdown {
-        width: 100%; /* Full width for smaller screens */
-    }
-    #chat {
-        width: calc(100% - 20px); /* Adjust for smaller screens and scrollbar width */
+
+    #chat-form button {
+        margin-right: 10px;
     }
 }

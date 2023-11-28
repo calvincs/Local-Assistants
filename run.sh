@@ -33,9 +33,6 @@ if [ $FIRST_RUN == true ]; then
 fi
 
 # Step 6: Run Flask app
-echo "Starting Flask app..."
-FLASK_APP=app FLASK_ENV=development flask run --reload &
+echo "Starting Flask app at http://localhost:5000"
+FLASK_APP=app FLASK_ENV=development flask run --reload 
 
-# Open the browser after a short delay to allow the server to start
-sleep 2
-xdg-open http://localhost:5000

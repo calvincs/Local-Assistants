@@ -66,7 +66,7 @@ def index():
 @app.route('/submit', methods=['POST'])
 def submit():
     default_assistant_id = app.config.get('DEFAULT_ASSISTANT_ID')
-    user_message = request.form['message']
+    user_message = request.form['message'].strip()
     thread_id = session.get('thread_id')
     selected_assistant_id = session.get('selected_assistant_id', default_assistant_id)
 
@@ -84,33 +84,21 @@ def submit():
     ai_reply = messages[-1].content[0].text.value if messages else ""
     assistant_name = ASSISTANT_MAP.get(selected_assistant_id, "Unknown Assistant")
 
-    # Convert markdown to HTML and sanitize
+    # Format and sanitize AI's response
     ai_reply_html = markdown(ai_reply, extras=["tables", "fenced-code-blocks", "spoiler", "strike"])
     
-    # Create a BeautifulSoup object to parse HTML
-    soup = BeautifulSoup(ai_reply_html, 'html.parser')
-    
-    # Find all code blocks and update them
-    for pre in soup.find_all('pre'):
-        # Create a copy button and insert it at the beginning of the `pre` element
-        copy_button = soup.new_tag('button', **{
-            'class': 'copy-button', 
-            'onclick': 'copyCode(this)',
-            'title': 'Copy to clipboard'  # Adding a title for accessibility
-        })
-        copy_button.string = 'Copy'
-        # Insert the copy button as the first child of the `pre` element
-        pre.insert(0, copy_button)
-    
-    # Convert the soup object back to a string
-    ai_reply_html = str(soup)
+    # Add copy buttons to AI's response
+    ai_reply_html = add_copy_buttons_to_code(ai_reply_html)
 
     # Escaping user_message for security reasons
-    user_message_safe = escape(user_message)
+    #user_message = escape(user_message)
+    user_message = markdown(user_message, extras=["tables", "fenced-code-blocks", "spoiler", "strike"])
+    user_message = add_copy_buttons_to_code(user_message)
 
-    chat_html = f'<div class="user-message">{user_message_safe}</div>'
+    chat_html = f'<div class="user-message">{user_message}</div>'
     chat_html += f'<div class="ai-message"><div class="ai-agent-name">{assistant_name}</div> {ai_reply_html}</div>'
     return chat_html
+
 
 @app.route('/clear', methods=['POST'])
 def clear():
@@ -122,6 +110,22 @@ def clear():
     # The response doesn't need to change since HTMX will handle the reloading
     return '', 204
 
+
+def add_copy_buttons_to_code(html_content):
+    # Create a BeautifulSoup object to parse HTML
+    soup = BeautifulSoup(html_content, 'html.parser')
+    
+    # Find all code blocks and update them
+    for pre in soup.find_all('pre'):
+        copy_button = soup.new_tag('button', **{
+            'class': 'copy-button',
+            'onclick': 'copyCode(this)',
+            'title': 'Copy to clipboard'
+        })
+        copy_button.string = 'Copy'
+        pre.insert(0, copy_button)
+    
+    return str(soup)
 
 
 def submit_message(assistant_id, thread, user_message):
